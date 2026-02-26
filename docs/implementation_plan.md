@@ -1,18 +1,23 @@
-# README Update and Deployment Plan
+# Sudoku Web App: Real-World Implementation Record
 
-Update the `README.md` to ensure the screenshot is displayed correctly on GitHub and include a direct link to the deployed GitHub Pages site.
+This plan reflects the actual steps taken to develop and deploy the Premium Retro Sudoku app.
 
-## Proposed Changes
+## 1. Initial Prototype (`commit 1f8f759`)
+The goal was a zero-dependency, high-quality Sudoku web app.
+- **Language**: Vanilla JS (ES6+), CSS3, HTML5.
+- **Algorithm**: Backtracking for board generation.
+- **Audio**: Web Audio API `OscillatorNode` for mechanical sound effects.
+- **Aesthetics**: Custom CSS variables for the "Retro Light" theme.
 
-### README.md
+## 2. Infrastructure Updates
+Initially faced challenges with GitHub connectivity.
+- **Git Fix**: Switched from SSH to HTTPS to bypass local authentication issues.
+- **Deployment**: Leveraged GitHub Pages for static hosting via the `main` branch.
 
-#### [MODIFY] [README.md](file:///Users/lijiawei/Desktop/test/README.md)
-- Update the image path from absolute to relative (Done).
-- Add a direct link to the deployed GitHub Pages site: `https://sulicquer.github.io/sudoku-web/`.
+## 3. README & Asset Optimization (`commit 9cbf456`)
+Resolved visual issues in the repository documentation.
+- **Image Fix**: Replaced absolute local file paths (e.g., `file:///...`) with relative repo paths (`./example.png`) for GitHub compatibility.
+- **Curation**: Added a direct link to the deployed site in the README header.
 
-## Verification Plan
-
-### Manual Verification
-- Verify that the image path is relative: `![example](./example.png)`.
-- Verify that the deployment link follows the format `https://<username>.github.io/<repo>/`.
-- Instruction for user: Push the changes to GitHub and check the repository homepage.
+## 4. Full Process Documentation
+Final stage involves creating a comprehensive record of this journey for future reference.

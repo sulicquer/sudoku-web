@@ -1,39 +1,24 @@
-# README Update and Deployment Walkthrough
+# Sudoku Web App: Step-by-Step Development Story
 
-I have completed the updates to your `README.md` to ensure your gameplay screenshot displays correctly on GitHub and added a direct link for your friends to play.
+This document walks through the actual evolution of the project as recorded in the repository's git history.
 
-## Changes Made
+## 📦 Step 1: The Core Creation (`1f8f759`)
+The project began as a single-commit feature drop that included the entire application:
+- A playable 9x9 Sudoku board.
+- Difficulty selection (Easy, Medium, Hard).
+- A complete visual overhaul with "Retro Light" styling.
+- **Features**: Undo, Hint, Notes Mode, and Audio.
 
-### README.md
-- **Relative Image Path**: Changed the image path to `./example.png`. This ensures GitHub can find the image file within your repository.
-- **Direct Link**: Added a prominent "Online Play" link pointing to your GitHub Pages URL: [https://sulicquer.github.io/sudoku-web/](https://sulicquer.github.io/sudoku-web/)
+## 🔧 Step 2: Fixing Connectivity
+Before the docs could be completed, we addressed git pushing issues. We switched to HTTPS to ensure the code reached GitHub successfully.
 
-## Verification
+## 🚀 Step 3: Making it Public (`e953e91`, `9cbf456`)
+We focused on how others would see the project.
+- **Relative Paths**: We found that screenshots weren't showing up because they were linked to local computer files. We moved `example.png` into the repo and updated the README.
+- **Live URL**: Verified that `https://sulicquer.github.io/sudoku-web/` was working and promoted it in the README.
 
-### 1. Relative Path Checklist
-The image is now referenced as:
-```markdown
-![example](./example.png)
-```
-This is the standard way to reference images stored in the same folder as the README on GitHub.
+## 📖 Step 4: The Documentation Phase (`7425fb7` onwards)
+The final step was to document the process. We created `docs/task.md`, `docs/implementation_plan.md`, and `docs/walkthrough.md` to ensure the project has a clear history and roadmap.
 
-### 2. Deployment URL
-Based on your repo name `sudoku-web` and username `sulicquer`, your site is available at:
-`https://sulicquer.github.io/sudoku-web/`
-
-## How to Finalize
-
-To see these changes live, you just need to push your local changes to GitHub:
-
-1. **Commit and Push**:
-   ```bash
-   git add .
-   git commit -m "docs: update README with image and deployment link"
-   git push origin main
-   ```
-
-2. **Wait for Build**:
-   Wait about 30-60 seconds for GitHub Actions to rebuild your site.
-
-3. **Share the Link**:
-   Once the green checkmark appears in your repo actions or you see "Your site is live" in Settings -> Pages, you can send the URL to your friends!
+---
+*Verified via `git graph` and conversation logs.*
