@@ -4,6 +4,7 @@ class Sudoku {
         this.solution = Array(9).fill().map(() => Array(9).fill(0));
         this.userBoard = Array(9).fill().map(() => Array(9).fill(0));
         this.fixed = Array(9).fill().map(() => Array(9).fill(false));
+        this.notes = Array(9).fill().map(() => Array(9).fill().map(() => []));
     }
 
     // Generate full valid board
@@ -121,6 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnErase = document.getElementById('btn-erase');
     const btnUndo = document.getElementById('btn-undo');
     const btnHint = document.getElementById('btn-hint');
+    const btnNotes = document.getElementById('btn-notes');
 
     let game = new Sudoku();
     let selectedCell = null;
@@ -130,6 +132,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let timer = 0;
     let timerInterval = null;
     let history = []; // for undo
+    let notesMode = false;
+
+    // Sound effects
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(freq, type = 'sine', duration = 0.1) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    }
 
     function initGame() {
         game.createPuzzle(difficulty);
@@ -137,6 +156,8 @@ document.addEventListener('DOMContentLoaded', () => {
         mistakeCountEl.textContent = mistakes;
         selectedCell = null;
         history = [];
+        notesMode = false;
+        btnNotes.classList.remove('active');
         resetTimer();
         renderBoard();
         startTimer();
@@ -150,10 +171,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 cell.className = 'cell';
                 cell.dataset.r = r;
                 cell.dataset.c = c;
-                
+
                 const val = game.userBoard[r][c];
                 if (val !== 0) {
                     cell.textContent = val;
+                } else {
+                    // Render notes
+                    const cellNotes = game.notes[r][c];
+                    if (cellNotes.length > 0) {
+                        cell.classList.add('has-notes');
+                        const fragment = document.createDocumentFragment();
+                        const grid = document.createElement('div');
+                        grid.className = 'notes-grid';
+                        for (let n = 1; n <= 9; n++) {
+                            const span = document.createElement('span');
+                            span.textContent = cellNotes.includes(n) ? n : '';
+                            grid.appendChild(span);
+                        }
+                        fragment.appendChild(grid);
+                        cell.appendChild(fragment);
+                    }
                 }
 
                 if (game.fixed[r][c]) {
@@ -195,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const val = game.userBoard[r][c];
 
             // Highlight row, col, box
-            if (r === sr || c === sc || (Math.floor(r/3) === Math.floor(sr/3) && Math.floor(c/3) === Math.floor(sc/3))) {
+            if (r === sr || c === sc || (Math.floor(r / 3) === Math.floor(sr / 3) && Math.floor(c / 3) === Math.floor(sc / 3))) {
                 cell.classList.add('highlight');
             }
 
@@ -214,11 +251,24 @@ document.addEventListener('DOMContentLoaded', () => {
     function inputNumber(num) {
         if (!selectedCell) return;
         const { r, c } = selectedCell;
-        
+
         if (game.fixed[r][c]) return;
 
         const currentVal = game.userBoard[r][c];
         if (currentVal === num) return;
+
+        if (notesMode) {
+            const idx = game.notes[r][c].indexOf(num);
+            if (idx > -1) {
+                game.notes[r][c].splice(idx, 1);
+            } else {
+                game.notes[r][c].push(num);
+                game.notes[r][c].sort();
+            }
+            playSound(600, 'triangle', 0.05);
+            renderBoard();
+            return;
+        }
 
         // save to history
         history.push({ r, c, prev: currentVal });
@@ -227,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const cellEl = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
         cellEl.textContent = num;
         cellEl.classList.add('user-input');
-        
+
         // Remove old error class
         cellEl.classList.remove('error');
         // trigger reflow for animation reset
@@ -237,10 +287,12 @@ document.addEventListener('DOMContentLoaded', () => {
             cellEl.classList.add('error');
             mistakes++;
             mistakeCountEl.textContent = mistakes;
+            playSound(150, 'sawtooth', 0.3); // Error sound
             if (mistakes >= MAX_MISTAKES) {
                 gameOver(false);
             }
         } else {
+            playSound(800, 'sine', 0.1); // Correct sound
             // Check win
             if (game.checkWin()) {
                 gameOver(true);
@@ -254,17 +306,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!selectedCell) return;
         const { r, c } = selectedCell;
         if (game.fixed[r][c]) return;
-        
+
         const currentVal = game.userBoard[r][c];
         if (currentVal === 0) return;
 
         history.push({ r, c, prev: currentVal });
         game.userBoard[r][c] = 0;
-        
+
         const cellEl = document.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
         cellEl.textContent = '';
         cellEl.classList.remove('user-input', 'error');
-        
+
         updateHighlights();
     }
 
@@ -272,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (history.length === 0) return;
         const action = history.pop();
         game.userBoard[action.r][action.c] = action.prev;
-        
+
         const cellEl = document.querySelector(`.cell[data-r="${action.r}"][data-c="${action.c}"]`);
         if (action.prev === 0) {
             cellEl.textContent = '';
@@ -315,15 +367,29 @@ document.addEventListener('DOMContentLoaded', () => {
     function gameOver(isWin) {
         clearInterval(timerInterval);
         if (isWin) {
+            triggerConfetti();
             modalTitle.textContent = "恭喜过关！";
             modalTitle.style.color = "var(--success-color)";
-            modalMessage.textContent = `你用时 ${timerEl.textContent} 完成了${diffBtns[difficulty === 'easy' ? 0 : difficulty === 'medium' ? 1 : 2].textContent}难度的数独。`;
+            modalMessage.textContent = `你用时 ${timerEl.textContent} 完成了${diffBtns[difficulty === 'easy' ? 0 : difficulty === 'medium' ? 1 : 2].textContent}难度的数独。你真棒！`;
         } else {
             modalTitle.textContent = "游戏结束";
             modalTitle.style.color = "var(--error-color)";
-            modalMessage.textContent = "你已经达到了最大错误次数限制 (3次)。";
+            modalMessage.textContent = "你已经达到了最大错误次数限制 (3次)。别灰心，再来一局吧！";
         }
         modalOverlay.classList.remove('hidden');
+    }
+
+    function triggerConfetti() {
+        const colors = ['#bc6c25', '#dda15e', '#606c38', '#283618'];
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.animationDelay = Math.random() * 2 + 's';
+            document.body.appendChild(confetti);
+            setTimeout(() => confetti.remove(), 4000);
+        }
     }
 
     // Event Listeners
@@ -348,6 +414,8 @@ document.addEventListener('DOMContentLoaded', () => {
             inputNumber(parseInt(e.key));
         } else if (e.key === 'Backspace' || e.key === 'Delete') {
             eraseCell();
+        } else if (e.key.toLowerCase() === 'p') {
+            btnNotes.click();
         } else if (selectedCell) {
             let { r, c } = selectedCell;
             if (e.key === 'ArrowUp') r = Math.max(0, r - 1);
@@ -361,7 +429,12 @@ document.addEventListener('DOMContentLoaded', () => {
     btnErase.addEventListener('click', eraseCell);
     btnUndo.addEventListener('click', undo);
     btnHint.addEventListener('click', provideHint);
-    
+    btnNotes.addEventListener('click', () => {
+        notesMode = !notesMode;
+        btnNotes.classList.toggle('active');
+        playSound(440, 'sine', 0.05);
+    });
+
     btnNewGame.addEventListener('click', initGame);
     btnModalClose.addEventListener('click', () => {
         modalOverlay.classList.add('hidden');
