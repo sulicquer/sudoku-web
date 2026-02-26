@@ -43,6 +43,14 @@
 1. 在仓库 Settings -> Pages 中选择 `main` 分支。
 2. 稍等片刻即可通过 GitHub 提供的网址在线游玩。
 
+## 🏗️ 开发过程
+
+本项目由 **Antigravity AI** 全程自主设计与开发。你可以通过以下文档了解详细的开发过程：
+
+- [📋 任务清单 (Task List)](./docs/task.md)
+- [🛠️ 实施方案 (Implementation Plan)](./docs/implementation_plan.md)
+- [📝 开发复盘 (Walkthrough)](./docs/walkthrough.md)
+
 ---
 
-*由 Antigravity AI 协助开发 🚀*
+*由 Antigravity AI 全程自主开发 🚀*
