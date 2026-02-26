@@ -2,7 +2,9 @@
 
 一款具备极致复古美学设计、功能完备且交互流畅的现代 Web 数独游戏。
 
-![极致数独界面](file:///Users/lijiawei/Desktop/test/screenshot.png)
+[**👉 在线游玩地址**](https://sulicquer.github.io/sudoku-web/)
+
+![example](./example.png)
 
 ## ✨ 特色功能
 
